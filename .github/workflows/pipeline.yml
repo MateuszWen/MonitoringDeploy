@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: check out 
+      - name: Check Out 
         uses: actions/checkout@v2
       - name: Setting up SSH key
         run: |
@@ -18,9 +18,10 @@ jobs:
           chmod 600 private_key.pem
       - name: Run Ansible Playbook
         run: |
+          pwd
           sudo apt update
           sudo apt install -y ansible
-          ansible-playbook -i ansible_dir/inventory.yml ansible_dir/playbook.yml \
+          ansible-playbook -i /ansible_dir/inventory.yml /ansible_dir/playbook.yml \
           --private-key=private_key.pem \
           --user=${{ secrets.REMOTE_USER }} \
           -e "{target: env.HOST_ADDRESS}"
