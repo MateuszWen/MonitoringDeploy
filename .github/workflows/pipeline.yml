@@ -24,5 +24,4 @@ jobs:
           ls -lart
           sudo apt update
           sudo apt install -y ansible
-          cd ansible_dir
           ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "{target: env.HOST_ADDRESS}"
