@@ -13,10 +13,12 @@ jobs:
       - name: Check Out 
         uses: actions/checkout@v3
       - name: Setting up SSH key
+        working-directory: ./ansible_dir
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /ansible_dir/private_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 600 private_key.pem
       - name: Run Ansible Playbook
+        working-directory: ./ansible_dir
         run: |
           pwd
           ls -lart
