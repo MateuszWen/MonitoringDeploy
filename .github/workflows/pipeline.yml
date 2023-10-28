@@ -19,6 +19,7 @@ jobs:
       - name: Run Ansible Playbook
         run: |
           pwd
+          ls -lart
           sudo apt update
           sudo apt install -y ansible
           ansible-playbook -i /ansible_dir/inventory.yml /ansible_dir/playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "{target: env.HOST_ADDRESS}"
