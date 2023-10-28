@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Check Out 
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Setting up SSH key
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
@@ -21,7 +21,4 @@ jobs:
           pwd
           sudo apt update
           sudo apt install -y ansible
-          ansible-playbook -i /ansible_dir/inventory.yml /ansible_dir/playbook.yml \
-          --private-key=private_key.pem \
-          --user=${{ secrets.REMOTE_USER }} \
-          -e "{target: env.HOST_ADDRESS}"
+          ansible-playbook -i /ansible_dir/inventory.yml /ansible_dir/playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "{target: env.HOST_ADDRESS}"
