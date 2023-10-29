@@ -10,6 +10,7 @@ on:
 
 env:
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+  HOST_ADDRESS: ${{ env.HOST_ADDRESS }}
 
 jobs:
   deployconfiguration:
@@ -19,50 +20,20 @@ jobs:
       - name: Check Out 
         uses: actions/checkout@v3
 
-      # - name: Setting up SSH key
-      #   working-directory: ./ansible_dir
-      #   run: |
-      #     echo $SSH_PRIVATE_KEY > private_key.pem
-      #     chmod 600 private_key.pem
-      # - name: Install SSH key 
-      #   uses: shimataro/ssh-key-action@v2
-      #   with:
-      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
-      #     name: private_key # optional
-      #     known_hosts: 4.245.250.242
-      #     if_key_exists: fail 
-
-      # - name: Run Ansible Playbook
-      #   working-directory: ./ansible_dir
-      #   run: |
-      #     ls -lart | grep private_key
-      #     cat private_key.pem
-      #     echo "Host address: ${{ env.HOST_ADDRESS }}"
-      #     sudo apt update
-      #     sudo apt install -y ansible
-      #     ansible-playbook -i inventory.yml playbook.yml
-
-      - name: Odczytaj zawartość pliku "inventory"
+      - name: Setting up SSH key
         working-directory: ./ansible_dir
-        id: read_inventory
         run: |
-          echo "::set-output name=inventory_content::$(cat inventory)"
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
 
-      - name: Uruchom Ansible Playbook
-        uses: dawidd6/action-ansible-playbook@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          playbook: ./ansible_dir/playbook.yml
-          inventory: ${{ steps.read_inventory.outputs.inventory_content }}
-          options: |
-            --verbose
-            --extra-vars target=4.245.250.242 
-            --extra-vars user=azureuser
-
-
-
-
-#          ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "target=4.245.250.242" -e "user=azureuser" -v
+      - name: Run Ansible Playbook
+        working-directory: ./ansible_dir
+        run: |
+          ls -lart | grep private_key
+          echo "Host address: $HOST_ADDRESS"
+          sudo apt update
+          sudo apt install -y ansible
+          ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem -e "target=4.245.250.242" -e "user=azureuser" -v
 
 
 #           ansible-playbook -i inventory.yml playbook.yml --private-key="${{ secrets.SSH_PRIVATE_KEY }}" --user=${{ secrets.REMOTE_USER }} -e "{target: 4.245.250.242 }"
