@@ -40,8 +40,8 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          playbook: playbook.yml
-          inventory: inventory.yml
+          playbook: ./ansible_dir/playbook.yml
+          inventory: ./ansible_dir/inventory.yml
           options: |
             --verbose
 
