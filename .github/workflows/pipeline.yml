@@ -1,7 +1,7 @@
 name: Upload Ansible configuration 
 
 on: 
-  workflow_dispatch: []
+  workflow_dispatch: 
   push: 
     branches:
       - "try_without_unofficial_actions"
