@@ -23,4 +23,4 @@ jobs:
           echo "Host address: ${{ env.HOST_ADDRESS }}"
           sudo apt update
           sudo apt install -y ansible
-          ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "{target: ${{ env.HOST_ADDRESS}} }"
+          ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "{target: 4.245.250.242 }"
