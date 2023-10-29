@@ -15,27 +15,26 @@ env:
 
 jobs:
   deployconfiguration:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Check Out 
-        uses: actions/checkout@v3
-
-      - name: Setting up SSH key
-        working-directory: ./ansible_dir
-        run: |
-          echo "$SSH_PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-
-      - name: Run Ansible Playbook
-        working-directory: ./ansible_dir
-        run: |
-          ls -lart | grep private_key
-          cat private_key.pem
-          echo "Host address: $HOST_ADDRESS"
-          sudo apt update
-          sudo apt install -y ansible
-          ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem -e "target=4.245.250.242" -e "user=azureuser" -v
-
-
-#           ansible-playbook -i inventory.yml playbook.yml --private-key="${{ secrets.SSH_PRIVATE_KEY }}" --user=${{ secrets.REMOTE_USER }} -e "{target: 4.245.250.242 }"
+      runs-on: ubuntu-latest
+      steps: 
+        - uses: actions/checkout@v3
+          with:
+            submodules: true
+            token: ${{secrets.REPO_TOKEN}}
+        - name: Setup SSH 
+          shell: bash
+          run: |
+            eval `ssh-agent -s`
+            mkdir -p /home/runner/.ssh/
+            touch /home/runner/.ssh/id_rsa
+            echo -e "${{secrets.SSH_PRIVATE_KEY}}" > /home/runner/.ssh/id_rsa
+            chmod 700 /home/runner/.ssh/id_rsa
+            ssh-keyscan -t rsa,dsa,ecdsa,ed25519 ${{secrets.SSH_PRIVATE_KEY}} >> /home/runner/.ssh/known_hosts
+        - name: Run ansible script
+          working-directory: ./ansible_dir
+          shell: bash 
+          run: |
+            sudo apt update
+            sudo apt install -y ansible
+            service ssh status
+            ansible-playbook -i inventory.yml playbook.yml --private-key=/home/runner/.ssh/id_rsa -e "target=4.245.250.242" -e "user=azureuser" -vvv
