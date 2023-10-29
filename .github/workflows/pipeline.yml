@@ -13,19 +13,10 @@ env:
 
 jobs:
   deployconfiguration:
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-22.04
       steps: 
         - name: Check Out 
           uses: actions/checkout@v3
-
-        # - name: Set up Python 3.9
-        #   uses: actions/setup-python@v2
-        #   with:
-        #     python-version: 3.9
-
-        - name: Update & Upgrade
-          run: |
-            sudo apt update -y && sudo apt upgrade -y
 
         - name: Install Ansible
           run: |
