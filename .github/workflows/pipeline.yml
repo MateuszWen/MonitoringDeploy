@@ -2,9 +2,6 @@ name: Upload Ansible configuration
 
 on: 
   workflow_dispatch: 
-  push: 
-    branches:
-      - "try_without_unofficial_actions"
 
 env:
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
