@@ -9,7 +9,7 @@ env:
   HOST_USER: ${{ vars.HOST_USER }}
 
 jobs:
-  deployconfiguration:
+  deploy_configuration:
       runs-on: ubuntu-22.04
       steps: 
         - name: Check Out 
