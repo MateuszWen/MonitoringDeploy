@@ -25,15 +25,11 @@ jobs:
           shell: bash
           run: |
             eval `ssh-agent -s`
-            echo "Jestem1"
             mkdir -p /home/runner/.ssh/
-            echo "Jestem2"
             touch /home/runner/.ssh/id_rsa
             echo -e "${{secrets.SSH_PRIVATE_KEY}}" > /home/runner/.ssh/id_rsa
-            echo "Jestem3"
             chmod 700 /home/runner/.ssh/id_rsa
             ssh-keyscan -t rsa ${{vars.HOST_ADDRESS}} >> /home/runner/.ssh/known_hosts
-            echo "Jestem4"
         - name: Run ansible script
           working-directory: ./ansible_dir
           shell: bash 
@@ -41,4 +37,4 @@ jobs:
             sudo apt update
             sudo apt install -y ansible
             service ssh status
-            ansible-playbook -i inventory.yml playbook.yml --private-key=/home/runner/.ssh/id_rsa -e "target=4.245.250.242" -e "user=azureuser" -vvv
+            ansible-playbook -i inventory.yml playbook.yml --private-key=/home/runner/.ssh/id_rsa -e "target=4.245.250.242" -e "user=azureuser" -v
