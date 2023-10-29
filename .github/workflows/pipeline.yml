@@ -32,6 +32,7 @@ jobs:
         working-directory: ./ansible_dir
         run: |
           ls -lart | grep private_key
+          echo private_key.pem
           echo "Host address: ${{ env.HOST_ADDRESS }}"
           sudo apt update
           sudo apt install -y ansible
