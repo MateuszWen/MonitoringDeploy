@@ -7,10 +7,11 @@ on:
   push: 
     branches:
       - "create_pipeline_ansible_run_tests"
+      - "check_passing_to_command_line"
 
 env:
   SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  HOST_ADDRESS: ${{ env.HOST_ADDRESS }}
+  HOST_ADDRESS: ${{ HOST_ADDRESS }}
 
 jobs:
   deployconfiguration:
