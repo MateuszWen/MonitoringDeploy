@@ -47,11 +47,11 @@ jobs:
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           playbook: ./ansible_dir/playbook.yml
-          inventory: |
-            [monitor]
-            server1 ansible_host=4.245.250.242 ansible_user=azureuser
+          inventory: ./ansible_dir/inventory.yml
           options: |
             --verbose
+            --extra-vars target=4.245.250.242 
+            --extra-vars user=azureuser
 
 
 #          ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "target=4.245.250.242" -e "user=azureuser" -v
