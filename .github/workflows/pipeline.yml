@@ -15,18 +15,18 @@ jobs:
     steps:
       - name: Check Out 
         uses: actions/checkout@v3
-      # - name: Setting up SSH key
-      #   working-directory: ./ansible_dir
-      #   run: |
-      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
-      #     chmod 600 private_key.pem
-      - name: Install SSH key 
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          name: private_key # optional
-          known_hosts: 4.245.250.242
-          if_key_exists: fail 
+      - name: Setting up SSH key
+        working-directory: ./ansible_dir
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+      # - name: Install SSH key 
+      #   uses: shimataro/ssh-key-action@v2
+      #   with:
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     name: private_key # optional
+      #     known_hosts: 4.245.250.242
+      #     if_key_exists: fail 
 
       - name: Run Ansible Playbook
         working-directory: ./ansible_dir
@@ -34,7 +34,7 @@ jobs:
           echo "Host address: ${{ env.HOST_ADDRESS }}"
           sudo apt update
           sudo apt install -y ansible
-          ansible-playbook -i inventory.yml playbook.yml --user=${{ secrets.REMOTE_USER }} -e "target=4.245.250.242"
+          ansible-playbook -i inventory.yml playbook.yml --private-key=private_key.pem --user=${{ secrets.REMOTE_USER }} -e "target=4.245.250.242, user=azureuser" -v
 
 
 #           ansible-playbook -i inventory.yml playbook.yml --private-key="${{ secrets.SSH_PRIVATE_KEY }}" --user=${{ secrets.REMOTE_USER }} -e "{target: 4.245.250.242 }"
