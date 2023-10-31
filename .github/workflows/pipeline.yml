@@ -13,81 +13,72 @@ env:
 
 jobs:
   deploy_infra:
-      name: Deploy infrastructure
-      runs-on: ubuntu-22.04
+    name: Deploy infrastructure
+    runs-on: ubuntu-22.04
 
-      env:
-        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.MVP_SUBSCRIPTION }}
-        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-        SSH_PUBLIC: ${{ secrets.SSH_PUBLIC }}
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.MVP_SUBSCRIPTION }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      SSH_PUBLIC: ${{ secrets.SSH_PUBLIC }}
 
-      steps: 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout code
-        uses: actions/checkout@v3
+    steps: 
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Checkout code and Deploy configuration
+      uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
+    - name: Terraform setup
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_wrapper: false
 
-      - name: Terraform setup
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_wrapper: false
+    - name: Terraform init
+      working-directory: ./terraform
+      run: |
+        terraform init -backend-config=backend.tfvars       
 
-      - name: Terraform init
-        working-directory: ./terraform
-        run: |
-          terraform init -backend-config=backend.tfvars       
+    - name: Terraform Validate
+      working-directory: ./terraform
+      run: terraform validate -no-color
 
-      - name: Terraform Validate
-        working-directory: ./terraform
-        run: terraform validate -no-color
+    - name: Create public key file 
+      working-directory: ./terraform
+      run: | 
+        echo "$SSH_PUBLIC" > public_key.pub
 
-      - name: Create public key file 
-        working-directory: ./terraform
-        run: | 
-          echo "$SSH_PUBLIC" > public_key.pub
-
-      - name: Terraform plan
-        working-directory: ./terraform
-        continue-on-error: true
-        run: |
-          terraform plan -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER"   
+    - name: Terraform plan
+      working-directory: ./terraform
+      continue-on-error: true
+      run: |
+        terraform plan -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER"   
                     
-      - name: Terraform apply
-        working-directory: ./terraform
-        run: |
-          terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER"        
+    - name: Terraform apply
+      working-directory: ./terraform
+      run: |
+        terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER"        
 
-      - name: Save Terraform output to variable
-        run: | 
-          echo "::set-env name=HOST_ADDRESS::$(terraform output my_output)""
+    - name: Save Terraform output to variable
+      run: | 
+        echo "::set-env name=HOST_ADDRESS::$(terraform output my_output)""
 
-  deploy_configuration:
-      name: Deploy configuration
-      runs-on: ubuntu-22.04
-      steps: 
-        - name: Check Out 
-          uses: actions/checkout@v3
-
-        - name: Install Ansible
-          run: |
-            sudo apt install -y ansible
-
-        - name: Setup SSH 
-          shell: bash
-          run: |
-            eval `ssh-agent -s`
-            mkdir -p /home/runner/.ssh/
-            touch /home/runner/.ssh/id_rsa
-            echo -e "$SSH_PRIVATE" > /home/runner/.ssh/id_rsa
-            chmod 700 /home/runner/.ssh/id_rsa
-            ssh-keyscan -t rsa $HOST_ADDRESS >> /home/runner/.ssh/known_hosts
-
-        - name: Run Ansible script
-          working-directory: ./ansible_dir
-          shell: bash 
-          run: |
-            service ssh status
-            ansible-playbook -i inventory.yml playbook.yml --private-key=/home/runner/.ssh/id_rsa -e "target=$HOST_ADDRESS" -e "user=$HOST_USER" -v
+    - name: Install Ansible
+      run: |
+        sudo apt install -y ansible
+        
+    - name: Setup SSH 
+      shell: bash
+      run: |
+        eval `ssh-agent -s`
+        mkdir -p /home/runner/.ssh/
+        touch /home/runner/.ssh/id_rsa
+        echo -e "$SSH_PRIVATE" > /home/runner/.ssh/id_rsa
+        chmod 700 /home/runner/.ssh/id_rsa
+        ssh-keyscan -t rsa $HOST_ADDRESS >> /home/runner/.ssh/known_hosts
+        
+    - name: Run Ansible script
+      working-directory: ./ansible_dir
+      shell: bash 
+      run: |
+        service ssh status
+        ansible-playbook -i inventory.yml playbook.yml --private-key=/home/runner/.ssh/id_rsa -e "target=$HOST_ADDRESS" -e "user=$HOST_USER" -v
