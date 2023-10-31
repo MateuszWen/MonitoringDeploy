@@ -1,15 +1,71 @@
-name: Upload Ansible configuration 
+name: Upload Monitoring infrastructure
 
 on: 
   workflow_dispatch: 
+  push:
+    branches:
+      - "*"
 
 env:
-  SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-  HOST_ADDRESS: ${{ vars.HOST_ADDRESS }}
+  SSH_PRIVATE: ${{ secrets.SSH_PRIVATE }}
+  #HOST_ADDRESS: ${{ vars.HOST_ADDRESS }}
   HOST_USER: ${{ vars.HOST_USER }}
 
 jobs:
+  deploy_infra:
+      name: Deploy infrastructure
+      runs-on: ubuntu-22.04
+
+      env:
+        ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.MVP_SUBSCRIPTION }}
+        ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+        SSH_PUBLIC: ${{ secrets.SSH_PUBLIC }}
+
+      steps: 
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell
+
+      - name: Terraform setup
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform init
+        working-directory: ./terraform
+        run: |
+          terraform init -backend-config=backend.tfvars       
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate -no-color
+
+      - name: Create public key file 
+        working-directory: ./terraform
+        run: | 
+          echo "$SSH_PUBLIC" > public_key.pub
+
+      - name: Terraform plan
+        working-directory: ./terraform
+        continue-on-error: true
+        run: |
+          terraform plan -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER"   
+                    
+      - name: Terraform apply
+        working-directory: ./terraform
+        run: |
+          terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER"        
+
+      - name: Save Terraform output to variable
+        run: | 
+          echo "::set-env name=HOST_ADDRESS::$(terraform output my_output)""
+
   deploy_configuration:
+      name: Deploy configuration
       runs-on: ubuntu-22.04
       steps: 
         - name: Check Out 
@@ -25,7 +81,7 @@ jobs:
             eval `ssh-agent -s`
             mkdir -p /home/runner/.ssh/
             touch /home/runner/.ssh/id_rsa
-            echo -e "$SSH_PRIVATE_KEY" > /home/runner/.ssh/id_rsa
+            echo -e "$SSH_PRIVATE" > /home/runner/.ssh/id_rsa
             chmod 700 /home/runner/.ssh/id_rsa
             ssh-keyscan -t rsa $HOST_ADDRESS >> /home/runner/.ssh/known_hosts
 
