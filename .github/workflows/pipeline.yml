@@ -2,9 +2,6 @@ name: Upload Monitoring infrastructure
 
 on: 
   workflow_dispatch: 
-  push:
-    branches:
-      - "*"
 
 env:
   ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
