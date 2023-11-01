@@ -2,15 +2,19 @@ variable "rg_name" {
   default = "rg3"
 }
 
-variable "var_location" {
+variable "location" {
   default = "eastus"
 }
 
-variable "var_subnet" {
+variable "vnet_name" {
+  default = "virtual-vnet"
+}
+
+variable "subnet" {
   default = "subnet1"
 }
 
-variable "var_nsg_name" {
+variable "nsg_name" {
   default = "nsg1_group"
 }
 
@@ -24,5 +28,28 @@ variable "private_key" {
 
 variable "user_name" {
   default = "azureuser"
-  
+}
+
+variable "publicIp_name" {
+  default = "publicIP"
+}
+
+variable "network_interface_name" {
+  default = "network_interface_name"
+}
+
+variable "linuxMachine_name" {
+  default = "linuxMachine"
+}
+
+variable "vmLinuxSize" {
+  default = "Standard_B1s"
+}
+
+variable "storage_account_type" {
+  default = "Standard_LRS"
+}
+
+variable "ip_configuration_name" {
+  default = "ip_configuration_name"
 }

@@ -7,24 +7,20 @@ on:
       - "*"
 
 env:
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.MVP_SUBSCRIPTION }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  SSH_PUBLIC: ${{ secrets.SSH_PUBLIC }}
   SSH_PRIVATE: ${{ secrets.SSH_PRIVATE }}
-  HOST_ADDRESS: ${{ vars.HOST_ADDRESS }}
   HOST_USER: ${{ vars.HOST_USER }}
 
 jobs:
   deploy_infra:
     name: Deploy infrastructure
     runs-on: ubuntu-22.04
-
-    env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.MVP_SUBSCRIPTION }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      SSH_PUBLIC: ${{ secrets.SSH_PUBLIC }}
-
     steps: 
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+
     - name: Checkout code and Deploy configuration
       uses: actions/checkout@v3
 
@@ -84,3 +80,7 @@ jobs:
       run: |
         service ssh status
         ansible-playbook -i inventory.yml playbook.yml --private-key=/home/runner/.ssh/id_rsa -e "target=$HOST_ADDRESS" -e "user=$HOST_USER" -v
+
+    - name: Display address and username to login
+      run: |
+        echo -e "Host address: $HOST_ADDRESS\nUsername: $HOST_USER"

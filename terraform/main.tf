@@ -7,13 +7,6 @@ terraform {
       version = "~> 3.0.2"
     }
   }
-
-  # backend "azurerm" {
-  #   resource_group_name  = "rg2"
-  #   storage_account_name = "stacterraform12"
-  #   container_name       = "terraforminit"
-  #   key                  = "terraform.tfstate"
-  # }
 }
 
 provider "azurerm" {
@@ -26,12 +19,12 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "rg" {
   name     = var.rg_name
-  location = var.var_location
+  location = var.location
 }
 
 # Create virtual network
 resource "azurerm_virtual_network" "virtual_network" {
-  name                = "virtual-vnet"
+  name                = var.vnet_name
   address_space       = ["10.0.0.0/16"]
   subnet              = []
   location            = azurerm_resource_group.rg.location
@@ -39,7 +32,7 @@ resource "azurerm_virtual_network" "virtual_network" {
 }
 
 resource "azurerm_subnet" "subnet1" {
-  name                 = var.var_subnet
+  name                 = var.subnet
   resource_group_name  = azurerm_resource_group.rg.name
   virtual_network_name = azurerm_virtual_network.virtual_network.name
   address_prefixes     = ["10.0.0.0/17"]
@@ -47,12 +40,12 @@ resource "azurerm_subnet" "subnet1" {
 }
 
 resource "azurerm_network_security_group" "nsg_group" {
-  name                = var.var_nsg_name
+  name                = var.nsg_name
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
 
   security_rule {
-    name                       = "nsg_rule1"
+    name                       = "AllowSSH"
     priority                   = 100
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -60,7 +53,31 @@ resource "azurerm_network_security_group" "nsg_group" {
     source_address_prefix      = "*"
     direction                  = "Inbound"
     source_port_range          = "*"
-    destination_port_range     = "*"
+    destination_port_range     = "22"
+  }
+
+  security_rule {
+    name                       = "AllowGrafana"
+    priority                   = 110
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    destination_address_prefix = "*"
+    source_address_prefix      = "*"
+    direction                  = "Inbound"
+    source_port_range          = "*"
+    destination_port_range     = "3000"
+  }
+
+  security_rule {
+    name                       = "AllowPrometheus"
+    priority                   = 120
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    destination_address_prefix = "*"
+    source_address_prefix      = "*"
+    direction                  = "Inbound"
+    source_port_range          = "*"
+    destination_port_range     = "9090"
   }
 }
 
@@ -70,18 +87,18 @@ resource "azurerm_subnet_network_security_group_association" "association" {
 }
 
 resource "azurerm_public_ip" "publicIP" {
-  name                = "publicIp1"
+  name                = var.publicIp_name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "network_interface_vm_linux" {
-  name                = "network_interface_name"
+  name                = var.network_interface_name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
   ip_configuration {
-    name                          = "ip_configuration_name"
+    name                          = var.ip_configuration_name
     subnet_id                     = azurerm_subnet.subnet1.id
     public_ip_address_id          = azurerm_public_ip.publicIP.id
     private_ip_address_allocation = "Dynamic"
@@ -89,10 +106,10 @@ resource "azurerm_network_interface" "network_interface_vm_linux" {
 }
 
 resource "azurerm_linux_virtual_machine" "vm_linux_name" {
-  name                = "linuxMachine"
+  name                = var.linuxMachine_name
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  size                = "Standard_B1s"
+  size                = var.vmLinuxSize
   admin_username      = var.user_name
   network_interface_ids = [
     azurerm_network_interface.network_interface_vm_linux.id
@@ -105,7 +122,7 @@ resource "azurerm_linux_virtual_machine" "vm_linux_name" {
 
   os_disk {
     caching              = "ReadWrite"
-    storage_account_type = "Standard_LRS"
+    storage_account_type = var.storage_account_type
   }
 
   source_image_reference {
