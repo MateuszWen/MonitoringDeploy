@@ -1,7 +1,15 @@
 # Monitoring Deploy 
 
 
-Code contains GitHub Action and Ansible pipelines to configure remote server.
+The code contains GitHub Action pipelines to deploy and then configure Grafana and Prometheus on the remote server.
+Server deployment has been conducted using Terraform, while Ansible has been used to configuration deployment.
+
+## Terraform code
+In terraform directory are:
+ - main.tf,
+ - backend.tfvars, 
+ - variables.tf,
+ - output.tf. 
 
 ## Ansible code
 It consists of:
@@ -11,22 +19,32 @@ It consists of:
 
 Directory "roles" contains roles for Grafana, Prometheus, and node-exporter deployment. 
 
-
 ## GitHub Actions pipeline
-File pipeline.yml is implemented under the .github/workflows directory. To trigger pipeline, you have to do it manually. 
+The functionality of the pipeline could be divided into two stages. 
 
-In order to execute code without trouble, you have to define 3 variables in GitHub repository: 
+ 1. Creating of infrastructure
+ 2. Deployment of configuration
 
- - SSH_PRIVATE_KEY,
- - HOST_ADDRESS,
- - HOST_USER. 
-
-To ensure confidentiality, SSH_PRIVATE_KEY should be stored as a secure variable. 
+File pipeline.yml is implemented under the .github/workflows directory. To trigger the pipeline, you have to do it manually. 
 
 
 ## How to us?
+In order to execute code without trouble, you must create a Storage Account with a container on your Azure environment. Moreover, have to create a Service principal account with Contributor privilege to subscription.
 
- 1. Just create dump virtual machine with Linux OS,
- 2. clone the project to your remote repository,
- 3. add the above variables to GiHub repository,
- 4. then change tab to "Actions" and Run pipeline using "main" branch.
+ 1. Create a Storage Account with the container.
+ 2. Alter the following variables in the backend.tfvars:
+- resource_group_name =  &lt; name of Storage Account resource group &gt;
+- storage_account_name = &lt;name of Storage Account &gt;
+- container_name =  &lt;container name &gt;
+ 4. Create a Service principal account with Contributor privilege to subscription.
+ 5. Define the following variables in GitHub repository secrets: 
+ - AZURE_CLIENT_ID,
+ - AZURE_CLIENT_SECRET,
+ - AZURE_TENANT_ID,
+ - MVP_SUBSCRIPTION,
+ - SSH_PRIVATE,
+ - SSH_PUBLIC. 
+
+All above variables must be stored as secure variables to ensure confidentiality.
+
+4. Optionally modify variables.tf. 
