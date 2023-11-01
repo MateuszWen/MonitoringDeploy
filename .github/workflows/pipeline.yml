@@ -62,9 +62,9 @@ jobs:
       working-directory: ./terraform
       run: |
         terraform output public_ip_address  
-        sudo apt install telnet
-        telnet $HOST_ADDRESS 22
+        sudo apt install telnet        
         echo HOST_ADDRESS=$(terraform output public_ip_address) >> $GITHUB_ENV     
+        telnet $HOST_ADDRESS 22
 
     # - name: Save Terraform output to variable
     #   run: | 
