@@ -73,8 +73,7 @@ resource "azurerm_public_ip" "publicIP" {
   name                = "publicIp1"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  allocation_method   = "Dynamic"
-  depends_on = [ azurerm_linux_virtual_machine.vm_linux_name ]
+  allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "network_interface_vm_linux" {
