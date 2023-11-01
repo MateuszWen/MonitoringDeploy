@@ -62,7 +62,8 @@ jobs:
       working-directory: ./terraform
       run: |
         terraform output public_ip_address  
-        echo "HOST_ADDRESS=$(terraform output public_ip_address)" >> $GITHUB_ENV     
+        ping $HOST_ADDRESS
+        echo HOST_ADDRESS=$(terraform output public_ip_address) >> $GITHUB_ENV     
 
     # - name: Save Terraform output to variable
     #   run: | 
