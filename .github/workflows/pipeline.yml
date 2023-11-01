@@ -46,12 +46,12 @@ jobs:
       working-directory: ./terraform
       continue-on-error: true
       run: |
-        terraform plan -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER"   
+        terraform plan -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}"
                     
     - name: Terraform apply
       working-directory: ./terraform
       run: |
-        terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER" 
+        terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}"
 
     - name: Save Host IP and Username to env variable
       working-directory: ./terraform
