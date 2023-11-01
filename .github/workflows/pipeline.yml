@@ -58,15 +58,11 @@ jobs:
       run: |
         terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -var "user_name=$HOST_USER" 
 
-    - name: Terraform output
+    - name: Save Host IP to env variable
       working-directory: ./terraform
       run: |
         terraform output public_ip_address  
         echo "HOST_ADDRESS=$(terraform output -raw public_ip_address)" >> $GITHUB_ENV     
-
-    # - name: Save Terraform output to variable
-    #   run: | 
-    #     echo "HOST_ADDRESS=$(terraform output public_ip_address)" >> $GITHUB_ENV
 
     - name: Install Ansible
       run: |
