@@ -28,7 +28,7 @@ jobs:
     - name: Terraform init
       working-directory: ./terraform
       run: |
-        terraform init -backend-config=backend.tfvars       
+        terraform init -backend-config=backend.tfvars -force-copy    
 
     - name: Terraform Validate
       working-directory: ./terraform
@@ -43,7 +43,7 @@ jobs:
       working-directory: ./terraform
       continue-on-error: true
       run: |
-        terraform plan -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -backend-config=backend.tfvars  
+        terraform plan -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" 
                     
     - name: Terraform apply
       working-directory: ./terraform
