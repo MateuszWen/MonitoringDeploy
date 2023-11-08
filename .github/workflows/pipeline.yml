@@ -48,7 +48,7 @@ jobs:
     - name: Terraform apply
       working-directory: ./terraform
       run: |
-        terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" -backend-config=backend.tfvars  
+        terraform apply -auto-approve -var="public_key_file_name=public_key.pub" -var="private_key=${{ secrets.SSH_PRIVATE }}" 
 
     - name: Save Host IP and Username to env variable
       working-directory: ./terraform
